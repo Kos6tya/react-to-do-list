@@ -5,88 +5,96 @@ import Checkbox from 'material-ui/Checkbox';
 import {List, ListItem} from 'material-ui/List';
 import MobileTearSheet from './MobileTearSheet';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
+import TextField from 'material-ui/TextField';
 import './ColumnList.css';
 
-/**
- * This object is used for type checking the props of the component.
- */
 const propTypes = {
 	title: PropTypes.string.isRequired,
 	items: PropTypes.array,
 	updateTask: PropTypes.func.isRequired,
 	removeTask: PropTypes.func.isRequired,
 	removeMode: PropTypes.bool,
+	editMode: PropTypes.bool, 
 };
 
-/**
- * This object sets default values to the optional props.
- */
 const defaultProps = {
 	items: [],
 	removeMode: [],
+	editMode: false, 
 };
 
-/**
- * This callback type is called `removeTask` and is displayed as a global symbol.
- *
- * @callback removeTask
- * @param {Object} event - The event generate by remove click.
- */
+class ColumnList extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			editedTasks: {},
+		};
+	}
 
-/**
- * This callback type is called `updateTask` and is displayed as a global symbol.
- *
- * @callback updateTask
- * @param {Object} target - The event generate by onChange.
- * @param {Object} item - The item to be updated.
- */
+	handleEditTaskChange = (event, id) => {
+		const { value } = event.target;
+		this.setState(prevState => ({
+			editedTasks: {
+				...prevState.editedTasks,
+				[id]: value,
+			},
+		}));
+	};
 
-/**
- * @description Represents the column list element.
- * @param {Object} props - The props that were defined by the caller of this component.
- * @param {string} props.title - The title of this column list.
- * @param {Object[]} [props.items=[]] - The array of tasks/items of the list.
- * @param {removeTask} props.removeTask - Callback executed when user click to remove the task.
- * @param {updateTask} props.updateTask - Callback executed when when user the done checkbox.
- * @param {boolean} [props.removeMode=false] - Indicates whether the app is in remove mode.
- * @returns {XML} Return the stateless component markup
- * @constructor
- */
-const ColumnList = (props) => {
-	return (
-		<div className="column-list">
-			<MobileTearSheet style={{pading: 10}}>
-				<List>
-					<CSSTransitionGroup
-						transitionName="task-animation"
-						transitionEnterTimeout={500}
-						transitionLeaveTimeout={300}>
-						{props.items.map(item => (
-							<ListItem
-								key={item.id+item.title}
-								onClick={() => (props.removeMode ? props.removeTask(item) : props.updateTask(item))}
-								rightIcon={props.removeMode ? <DeleteIcon /> :
-									<DeleteIcon style={{visibility: 'hidden'}} />}
-							>
-								<Checkbox
-									label={item.title}
-									disabled={props.removeMode}
-									checked={item.status === 'Done'}
-									className={(item.status === 'Done') ? 'task-done': ''}
-								/>
-							</ListItem>
-						))}
-					</CSSTransitionGroup>
-				</List>
-			</MobileTearSheet>
-		</div>
-	)
-};
+	handleEditTaskSubmit = (id) => {
+		const { editedTasks } = this.state;
+		const newTitle = editedTasks[id];
+		if (newTitle) {
+			const updatedTask = { ...this.props.items.find(item => item.id === id), title: newTitle };
+			this.props.updateTask(updatedTask);
+		}
+	};
 
-// Type checking the props of the component
+	render() {
+		const { editMode, items, removeMode, updateTask, removeTask } = this.props;
+		const { editedTasks } = this.state;
+
+		return (
+			<div className="column-list">
+				<MobileTearSheet style={{padding: 10}}>
+					<List>
+						<CSSTransitionGroup
+							transitionName="task-animation"
+							transitionEnterTimeout={500}
+							transitionLeaveTimeout={300}>
+							{items.map(item => (
+								<ListItem
+									key={item.id + item.title}
+									onClick={() => (removeMode ? removeTask(item) : updateTask(item))}
+									rightIcon={removeMode ? <DeleteIcon /> :
+										<DeleteIcon style={{visibility: 'hidden'}} />}
+								>
+									{editMode ? (
+										<TextField
+											value={editedTasks[item.id] !== undefined ? editedTasks[item.id] : item.title}
+											onChange={(e) => this.handleEditTaskChange(e, item.id)}
+											onBlur={() => this.handleEditTaskSubmit(item.id)}
+											fullWidth
+										/>
+									) : (
+										<Checkbox
+											label={item.title}
+											disabled={removeMode}
+											checked={item.status === 'Done'}
+											className={(item.status === 'Done') ? 'task-done' : ''}
+										/>
+									)}
+								</ListItem>
+							))}
+						</CSSTransitionGroup>
+					</List>
+				</MobileTearSheet>
+			</div>
+		);
+	}
+}
+
 ColumnList.propTypes = propTypes;
-
-// Assign default values to the optional props
 ColumnList.defaultProps = defaultProps;
 
 export default ColumnList;

@@ -1,20 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-/**
- * This object is used for type checking the props of the component.
- */
+
 const propTypes = {
 	children: PropTypes.object.isRequired,
 };
 
-/**
- * Represents a component that adds a zigzag-bottomed outline to a material-ui list component.
- * @param {Object} props - The props that were defined by the caller of this component.
- * @param {Object} props.children - Children component.
- * @returns {XML}
- * @constructor
- */
 const MobileTearSheet = (props) => {
 
 	const height = "100%";
@@ -64,7 +55,6 @@ const MobileTearSheet = (props) => {
 	);
 };
 
-// Type checking the props of the component
 MobileTearSheet.propTypes = propTypes;
 
 export default MobileTearSheet;

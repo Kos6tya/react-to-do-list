@@ -32,6 +32,11 @@
   height: 228px;
 }
 
+.enable-edit-mode {
+  position: fixed;
+  right: 90px;
+  bottom: 25px;
+}
 .enable-remove-mode {
   position: fixed;
   right: 25px;
